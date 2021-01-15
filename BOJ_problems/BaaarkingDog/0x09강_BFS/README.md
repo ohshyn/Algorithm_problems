@@ -52,7 +52,7 @@ main()
 ### 2178 미로 탐색
 
 ```
-BFS 활용: 하나의 시작점에서의 모든 지점으로의 최소 거리 구하기.
+BFS 활용2: 하나의 시작점에서의 모든 지점으로의 최소 거리 구하기.
 ```
 
 ```
@@ -142,7 +142,7 @@ print(main())
 ### 7569 토마토
 
 ```
-BFS 활용3: 3차원에서의 BFS, 여러 시작점에서 모든 지점으로의 최소 거리 구하기.
+BFS 활용4: 3차원에서의 BFS, 여러 시작점에서 모든 지점으로의 최소 거리 구하기.
 ```
 
 ```
@@ -195,7 +195,7 @@ print(main())
 ### 1697 숨바꼭질
 
 ```
-BFS 활용5: 1차원에서의 BFS.
+BFS 활용6: 1차원에서의 BFS.
 BFS 적용 범위에 대해 고민해볼 필요가 있는 문제.
 ```
 
@@ -227,6 +227,51 @@ def main():
 print(main())
 ```
 
+### 1012 유기농 배추
+
+```
+BFS 활용1: 시작 지점에서 연결된 모든 지점 탐방
+```
+
+```
+from collections import deque
+
+def main():
+    T = int(input())
+    for t in range(T):
+        C,R,K = map(int, input().split())
+        
+        ground = [[0 for _ in range(C)] for _ in range(R)]
+        for _ in range(K):
+            c,r = map(int, input().split())
+            ground[r][c] = 1
+        
+        cnt = 0
+        for r in range(R):
+            for c in range(C):
+                if ground[r][c] == 1:
+                    cnt += 1
+                    # BFS
+                    q = deque([(r,c)])
+                    ground[r][c] = -1 # 방문표시
+                    
+                    while q:
+                        cr,cc = q.popleft()
+                        dr = [-1,1,0,0]
+                        dc = [0,0,-1,1]
+                        for i in range(4):
+                            nr,nc = cr+dr[i],cc+dc[i]
+                            if not(0<=nr<R) or not(0<=nc<C):
+                                continue
+                            if ground[nr][nc] != 1:
+                                continue
+                            q.append((nr,nc))
+                            ground[nr][nc] = -1
+        print(cnt)
+        
+main()
+```
+
 ---
 
 # 틀린 문제
@@ -236,7 +281,7 @@ print(main())
 ### 4179 불!
 
 ```
-BFS 활용4: 하나는 다른 BFS에 종속적이고 나머지 하나는 독립적인 서로다른 BFS.
+BFS 활용5: 하나는 다른 BFS에 종속적이고 나머지 하나는 독립적인 서로다른 BFS.
 ```
 
 ```
