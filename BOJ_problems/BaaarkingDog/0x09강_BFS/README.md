@@ -272,6 +272,145 @@ def main():
 main()
 ```
 
+## 21.01.18
+
+### 2583 영역 구하기
+
+```
+BFS 활용: 모든 영역을 탐방하며 특정 영역의 크기 확인.
+좌표의 환산.
+```
+
+```
+from collections import deque
+
+
+def main():
+    R,C,K = map(int, input().split())
+    board = [[0 for _ in range(C)] for _ in range(R)]
+    for _ in range(K):
+        x1,y1,x2,y2 = map(int, input().split())
+        for r in range(R-y2, R-y1): # r
+            for c in range(x1, x2): # c
+                board[r][c] = 1
+    
+    cnt = 0
+    sizes = []
+    for r in range(R):
+        for c in range(C):
+            if board[r][c] == 0:
+                cnt += 1
+                q = deque([(r,c)])
+                board[r][c] = -1
+                cur_size = 0
+                while q:
+                    cr,cc = q.popleft()
+                    cur_size += 1
+                    dr,dc = [-1,1,0,0],[0,0,-1,1]
+                    for i in range(4):
+                        nr,nc = cr+dr[i],cc+dc[i]
+                        if not(0<=nr<R) or not(0<=nc<C):
+                            continue
+                        if board[nr][nc] != 0:
+                            continue
+                        q.append((nr,nc))
+                        board[nr][nc] = -1
+                sizes.append(cur_size)
+    print(cnt)
+    print(*sorted(sizes))
+    
+    
+main()
+```
+
+### 2667 단지번호붙이기
+
+```
+BFS 활용: 영역 개수 구하기, 영역 별 크기 구하기.
+```
+
+```
+from collections import deque
+
+
+def main():
+    N = int(input())
+    board = []
+    for r in range(N):
+        board.append(list(map(int, list(input()))))
+    
+    cnts = []
+    for r in range(N):
+        for c in range(N):
+            if board[r][c] == 1:
+                cur_cnt = 0
+                q = deque([(r,c)])
+                board[r][c] = -1
+                while q:
+                    cr,cc = q.popleft()
+                    cur_cnt += 1
+                    dr,dc = [-1,1,0,0],[0,0,-1,1]
+                    for i in range(4):
+                        nr,nc = cr+dr[i],cc+dc[i]
+                        if not(0<=nr<N) or not(0<=nc<N):
+                            continue
+                        if board[nr][nc] != 1:
+                            continue
+                        q.append((nr,nc))
+                        board[nr][nc] = -1
+                cnts.append(cur_cnt)
+    print(len(cnts))
+    for cnt in sorted(cnts):
+        print(cnt)
+
+
+main()
+```
+
+### 7562 나이트의 이동
+
+```
+BFS 활용: 출발 좌표에서 목적 좌표까지 몇 번의 규칙을 적용해야하는지 확인.
+```
+
+```
+from collections import deque
+
+
+def main():
+    T = int(input())
+    
+    steps = []
+    for _ in range(T):
+        L = int(input())
+        fr,fc = map(int, input().split())
+        tr,tc = map(int, input().split())
+        
+        board = [[0 for _ in range(L)] for _ in range(L)]
+        q = deque([(fr,fc)])
+        board[fr][fc] = 1
+        
+        while q:
+            cr,cc = q.popleft()
+            if (cr,cc) == (tr,tc):
+                steps.append(board[cr][cc]-1)
+                break
+            dr,dc = [-1,-2,-2,-1,1,2,2,1],[-2,-1,1,2,-2,-1,1,2]
+            for i in range(8):
+                nr,nc = cr+dr[i],cc+dc[i]
+                if not(0<=nr<L) or not(0<=nc<L):
+                    continue
+                if board[nr][nc] != 0:
+                    continue
+                q.append((nr,nc))
+                board[nr][nc] = board[cr][cc] + 1
+    for step in steps:
+        print(step)
+    
+
+main()
+```
+
 ---
 
 # 틀린 문제
