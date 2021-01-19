@@ -411,6 +411,130 @@ def main():
 main()
 ```
 
+## 21.01.19
+
+### 2468 안전 영역
+
+```
+조건에 따라 변하는 데이터 + BFS 기초
+```
+
+```
+from collections import deque
+
+
+def flood(heights, N, h):
+    board = [[0 if heights[r][c]<=h else heights[r][c] for c in range(N)] for r in range(N)]
+    
+    island_cnt = 0
+    for r in range(N):
+        for c in range(N):
+            if board[r][c] != 0:
+                island_cnt += 1
+                q = deque([(r,c)])
+                board[r][c] = 0
+                while q:
+                    cr,cc = q.popleft()
+                    dr,dc = [-1,1,0,0],[0,0,-1,1]
+                    for i in range(4):
+                        nr,nc = cr+dr[i],cc+dc[i]
+                        if not(0<=nr<N) or not(0<=nc<N):
+                            continue
+                        if board[nr][nc] <= 0:
+                            continue
+                        q.append((nr,nc))
+                        board[nr][nc] = 0
+    return island_cnt
+    
+
+def main():
+    N = int(input())
+    heights = [list(map(int, input().split())) for _ in range(N)]
+    
+    max_height = 0
+    for r in range(N):
+        for c in range(N):
+            max_height = max(max_height, heights[r][c])
+    #print(max_height)
+    
+    max_cnts = 0
+    for h in range(max_height + 1):
+        max_cnts = max(max_cnts, flood(heights, N, h))
+    print(max_cnts)
+
+
+main()
+```
+
+### 2573 빙산
+
+```
+BFS 알고리즘 구현 활용: 사방탐색, 기초 BFS
+```
+
+```
+def melting(heights, R,C):
+    cnts_0s = [[0 for _ in range(C)] for _ in range(R)]
+    for r in range(R):
+        for c in range(C):
+            if heights[r][c] != 0:
+                dr,dc = [-1,1,0,0],[0,0,-1,1]
+                cnt_0s = 0
+                for i in range(4):
+                    nr,nc = r+dr[i],c+dc[i]
+                    if not(0<=nr<R) or not(0<=nc<C):
+                        continue
+                    if heights[nr][nc] == 0:
+                        cnt_0s += 1
+                cnts_0s[r][c] = cnt_0s
+    return [[heights[r][c] - cnts_0s[r][c] if heights[r][c] - cnts_0s[r][c] >= 0 else 0 for c in range(C)] for r in range(R)]
+    
+from collections import deque
+def counting(heights, R,C):
+    cnt = 0
+    board = [[heights[r][c] for c in range(C)] for r in range(R)]
+    for r in range(R):
+        for c in range(C):
+            if board[r][c] != 0:
+                cnt += 1
+                q = deque([(r,c)])
+                board[r][c] = 0
+                while q:
+                    cr,cc = q.popleft()
+                    dr,dc = [-1,1,0,0],[0,0,-1,1]
+                    for i in range(4):
+                        nr,nc = cr+dr[i],cc+dc[i]
+                        if not(0<=nr<R) or not(0<=nc<C):
+                            continue
+                        if board[nr][nc] <= 0:
+                            continue
+                        q.append((nr,nc))
+                        board[nr][nc] = 0
+    return cnt
+
+def is_melt_all(heights, R,C):
+    cnt_0 = 0
+    for r in range(R):
+        cnt_0 += heights[r].count(0)
+    return cnt_0 == R*C
+
+def main():
+    R,C = map(int, input().split())
+    heights = [list(map(int, input().split())) for _ in range(R)]
+    year = 0
+    while True:
+        heights = melting(heights, R,C)
+        cnt = counting(heights, R,C)
+        year += 1
+        
+        if cnt >= 2:
+            return year
+        if is_melt_all(heights,R,C):
+            return 0
+
+print(main())
+```
+
 ---
 
 # 틀린 문제
@@ -475,4 +599,125 @@ def main():
 
 
 print(main())
+```
+
+## 21.01.19
+
+### 2206 벽 부수고 이동하기
+
+```
+맵의 형태를 바꿔가며 BFS
+```
+
+```
+from collections import deque
+
+
+def BFS(maze,cand,R,C):
+    board = [[maze[r][c] for c in range(C)] for r in range(R)]
+    board[cand[0]][cand[1]] = 0
+    
+    q = deque([(0,0)])
+    while q:
+        cr,cc = q.popleft()
+        if (cr,cc) == (R-1,C-1):
+            return board[cr][cc]+1
+        dr,dc = [-1,1,0,0],[0,0,-1,1]
+        for i in range(4):
+            nr,nc = cr+dr[i],cc+dc[i]
+            if not(0<=nr<R) or not(0<=nc<C):
+                continue
+            if board[nr][nc] != 0:
+                continue
+            q.append((nr,nc))
+            board[nr][nc] = board[cr][cc] + 1
+    else:
+        return -1
+    
+
+def main():
+    R,C = map(int, input().split())
+    maze = [list(map(int, list(input()))) for _ in range(R)]
+    
+    cands = []
+    for r in range(R):
+        for c in range(C):
+            if maze[r][c] == 1:
+                cands.append((r,c))
+    min_dist = R*C
+    for cand in cands:
+        cur_dist = BFS(maze, cand, R,C)
+        if cur_dist != -1:
+            min_dist = min(min_dist, cur_dist)
+            break
+    else:
+        min_dist = -1
+    print(min_dist)
+    
+    
+main()
+```
+
+### 5427 불
+
+```
+서로 다른 BFS 중 하나만 종속적일 때: 각각 BFS를 구하여 해결
+메모리 초과로 실패
+```
+
+```
+from collections import deque
+def main():
+    T = int(input())
+    for t in range(T):
+        C,R = map(int,input().split())
+        maze = [list(input()) for _ in range(R)]
+        pos_p, pos_f = (),[]
+        time_p, time_f = [[0 for _ in range(C)] for _ in range(R)],[[0 for _ in range(C)] for _ in range(R)]
+        
+        for r in range(R):
+            for c in range(C):
+                if maze[r][c] == '@':
+                    pos_p = (r,c)
+                elif maze[r][c] == '*':
+                    pos_f.append((r,c))
+        
+        q_f = deque(pos_f)
+        while q_f:
+            cr,cc = q_f.popleft()
+            dr,dc = [-1,1,0,0],[0,0,-1,1]
+            for i in range(4):
+                nr,nc = cr+dr[i],cc+dc[i]
+                if not(0<=nr<R) or not(0<=nc<C):
+                    continue
+                if maze[nr][nc] in ('#', '*'):
+                    continue
+                if time_f[nr][nc] != 0:
+                    continue
+                q_f.append((nr,nc))
+                time_f[nr][nc] = time_f[cr][cc] + 1
+        # for r in range(R):
+        #     print(time_f[r])
+        # print()
+        EXIT = False
+        q_p = deque([pos_p])
+        while q_p:
+            cr,cc = q_p.popleft()
+            dr,dc = [-1,1,0,0],[0,0,-1,1]
+            for i in range(4):
+                nr,nc = cr+dr[i],cc+dc[i]
+                if not(0<=nr<R) or not(0<=nc<C):
+                    EXIT = True
+                    print(time_p[cr][cc] + 1)
+                    break
+                if maze[nr][nc] in ['#', '*']:
+                    continue
+                if time_p[cr][cc]+1 >= time_f[nr][nc]:
+                    continue
+                q_p.append((nr,nc))
+                time_p[nr][nc] = time_p[cr][cc] + 1
+        if not EXIT:
+            print('IMPOSSIBLE')
+
+main()
 ```
