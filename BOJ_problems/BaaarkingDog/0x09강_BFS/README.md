@@ -535,6 +535,149 @@ def main():
 print(main())
 ```
 
+## 21.01.20
+
+### 2146 다리 만들기
+
+```
+BFS 활용
+```
+
+```
+from collections import deque
+from itertools import combinations
+
+def get_poss(board, N):
+    poss = []
+    visited = [[0 for _ in range(N)] for _ in range(N)]
+    for r in range(N):
+        for c in range(N):
+            if board[r][c] == 1 and visited[r][c] != 1:
+                q = deque([(r,c)])
+                visited[r][c] = 1
+                pos = [(r,c)]
+                while q:
+                    cr,cc = q.popleft()
+                    dr,dc = [-1,1,0,0],[0,0,-1,1]
+                    for i in range(4):
+                        nr,nc = cr+dr[i],cc+dc[i]
+                        if not(0<=nr<N) or not(0<=nc<N):
+                            continue
+                        if board[nr][nc] != 1:
+                            continue
+                        if visited[nr][nc] == 1:
+                            continue
+                        q.append((nr,nc))
+                        visited[nr][nc] = 1
+                        pos.append((nr,nc))
+                poss.append(pos)
+    return poss
+
+def main():
+    N = int(input())
+    board = [list(map(int,input().split())) for _ in range(N)]
+    
+    # 섬의 좌표들을 구하자
+    poss = get_poss(board, N)
+    # 각 쌍의 섬 좌표에서 최소치를 구하며 비교
+    bridge_len = N*N
+    island_cnt = len(poss)
+    
+    for comb in combinations(range(island_cnt),2):
+        i,j = comb
+        for k in range(len(poss[i])):
+            for l in range(len(poss[j])):
+                cur_len = abs(poss[i][k][0]-poss[j][l][0]) + abs(poss[i][k][1]-poss[j][l][1])
+                bridge_len = min(bridge_len, cur_len)
+    print(bridge_len-1)
+
+main()
+```
+
+### 5014 스타트링크
+
+```
+1차원 BFS
+```
+
+```
+from collections import deque
+
+def main():
+    HEIGHT,FROM,TO,UP,DOWN = map(int, input().split())
+    building = [-1 for _ in range(HEIGHT+1)]
+    
+    q = deque([FROM])
+    building[FROM] = 0
+    while q:
+        c = q.popleft()
+        if c == TO:
+            return building[c]
+        d = [+UP, -DOWN]
+        for i in range(2):
+            n = c+d[i]
+            if not(1<=n<HEIGHT+1):
+                continue
+            if building[n] != -1:
+                continue
+            q.append(n)
+            building[n] = building[c]+1
+    else:
+        return 'use the stairs'
+
+print(main())
+```
+
+### 6593 상범 빌딩
+
+```
+3차원 BFS
+```
+
+```
+from collections import deque
+def main():
+    while True:
+        H,R,C = map(int,input().split())
+        if (H,R,C) == (0,0,0):
+            break
+        building = []
+        for h in range(H):
+            row = []
+            for r in range(R):
+                row.append(list(input()))
+            building.append(row)
+            input() # 공백
+        pos_S,pos_E = (),()
+        for h in range(H):
+            for r in range(R):
+                for c in range(C):
+                    if building[h][r][c] == 'S':
+                        pos_S = (h,r,c)
+                    elif building[h][r][c] == 'E':
+                        pos_E = (h,r,c)
+        q = deque([pos_S])
+        building[pos_S[0]][pos_S[1]][pos_S[2]] = str(0)
+        while q:
+            ch,cr,cc = q.popleft()
+            if (ch,cr,cc) == pos_E:
+                print('Escaped in ' + building[ch][cr][cc] + ' minute(s).')
+                break
+            dh,dr,dc = [-1,1,0,0,0,0],[0,0,-1,1,0,0],[0,0,0,0,-1,1]
+            for i in range(6):
+                nh,nr,nc = ch+dh[i],cr+dr[i],cc+dc[i]
+                if not(0<=nh<H) or not(0<=nr<R) or not(0<=nc<C):
+                    continue
+                if building[nh][nr][nc] not in ['.','E']:
+                    continue
+                q.append((nh,nr,nc))
+                building[nh][nr][nc] = str(int(building[ch][cr][cc])+1)
+        else:
+            print('Trapped!')
+
+main()
+```
+
 ---
 
 # 틀린 문제
