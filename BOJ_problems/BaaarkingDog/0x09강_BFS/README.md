@@ -678,6 +678,37 @@ def main():
 main()
 ```
 
+### 13549 숨바꼭질 3
+
+```
+1차원 BFS 활용: 서로 다른 가중치로 탐색
+```
+
+```
+from collections import deque
+def main():
+    FROM,TO = map(int, input().split())
+    board = [-1 for _ in range(100001)]
+    q = deque([FROM])
+    board[FROM] = 0
+    while q:
+        c = q.popleft()
+        if c == TO:
+            return board[c]
+        d = [2*c, c-1, c+1]
+        for i in range(3):
+            n = d[i]
+            if not(0<=n<100001):
+                continue
+            if board[n] != -1:
+                continue
+            q.append(n)
+            board[n] = board[c] if i==0 else board[c]+1 
+
+
+print(main())
+```
+
 ---
 
 # 틀린 문제
@@ -861,6 +892,140 @@ def main():
                 time_p[nr][nc] = time_p[cr][cc] + 1
         if not EXIT:
             print('IMPOSSIBLE')
+
+main()
+```
+
+## 21.01.21
+
+### 1600 말이 되고픈 원숭이
+
+```
+한 객체에 서로 다른 이동 형태의 BFS
+```
+
+```
+from collections import deque
+def main():
+    # 하나의 객체가 다른 이동이 가능한 경우의 BFS
+    K = int(input())
+    C,R = map(int,input().split())
+    board = [list(map(int, input().split())) for _ in range(R)]
+    visit = [[[0 for _ in range(K+1)] for _ in range(C)] for _ in range(R)] # K+1 차원으로 말과 원숭이의 이동을 다른 차원에서 관리
+    q = deque()
+    
+    def horse(cr,cc,ch):
+        dr,dc = [-1,-2,-2,-1,1,2,2,1],[-2,-1,1,2,-2,-1,1,2]
+        for i in range(8):
+            nr,nc,nh = cr+dr[i],cc+dc[i],ch+1
+            if not(0<=nr<R) or not(0<=nc<C):
+                continue
+            if board[nr][nc] != 0:
+                continue
+            if visit[nr][nc][nh] != 0:
+                continue
+            visit[nr][nc][nh] = visit[nr][nc][ch]+1 # 말의 BFS는 원숭이와 다른 차원에서 관리
+            q.append((nr,nc,nh))
+    
+    def monkey(cr,cc,ch):
+        dr,dc = [-1,1,0,0],[0,0,-1,1]
+        for i in range(4):
+            nr,nc = cr+dr[i],cc+dc[i]
+            if not(0<=nr<R) or not(0<=nc<C):
+                continue
+            if board[nr][nc] != 0:
+                continue
+            if visit[nr][nc][ch] != 0:
+                continue
+            visit[nr][nc][ch] = visit[nr][nc][ch]+1
+            q.append((nr,nc,ch))
+    
+    def BFS():
+        q.append((0,0,0))
+        board[0][0] = 1
+        while q:
+            cr,cc,ch = q.popleft()
+            if (cr,cc) == (R-1,C-1):
+                print(board[cr][cc][ch]-1)
+                break
+            if ch < k:
+                horse(cr,cc,ch)
+                monkey(cr,cc,ch)
+            elif ch == l:
+                monkey(cr,cc,ch)
+        else:
+            print(-1)
+    
+    BFS()
+        
+main()
+```
+
+### 3197 백조의 호수
+
+```
+BFS 활용
+시간 초과: 얼음 녹이는 과정에서 개선이 필요
+```
+
+```
+from collections import deque
+def main():
+    R,C = map(int,input().split())
+    lake = [list(input()) for _ in range(R)]
+    # 한 백조의 위치에서 시작한 BFS 중 또 다른 백조를 만나면 끝
+    pos_swan = ()
+    for r in range(R):
+        for c in range(C):
+            if lake[r][c] == 'L':
+                pos_swan = (r,c)
+    
+    def BFS():
+        q = deque([pos_swan])
+        visited = [[0 for _ in range(C)] for _ in range(R)]
+        visited[pos_swan[0]][pos_swan[1]] = 1
+        while q:
+            cr,cc = q.popleft()
+            dr,dc = [-1,1,0,0],[0,0,-1,1]
+            for i in range(4):
+                nr,nc = cr+dr[i],cc+dc[i]
+                if not(0<=nr<R) or not(0<=nc<C):
+                    continue
+                if lake[nr][nc] not in ['.','L']:
+                    continue
+                if visited[nr][nc] != 0:
+                    continue
+                if lake[nr][nc] == 'L':
+                    return False # 다른 백조를 만나면 루프 종료
+                q.append((nr,nc))
+                visited[nr][nc] = 1
+        return True
+    
+    def melting():
+        water_cnt = [[0 for _ in range(C)] for _ in range(R)]
+        for r in range(R):
+            for c in range(C):
+                cnt = 0
+                dr,dc = [-1,1,0,0],[0,0,-1,1]
+                for i in range(4):
+                    nr,nc = r+dr[i],c+dc[i]
+                    if not(0<=nr<R) or not(0<=nc<C):
+                        continue
+                    if lake[nr][nc] == '.':
+                        cnt += 1
+                water_cnt[r][c] = cnt
+        for r in range(R):
+            for c in range(C):
+                if lake[r][c] == 'X' and water_cnt[r][c] > 0:
+                    lake[r][c] = '.'
+    
+    days = 0
+    while BFS():
+        # 백조가 못 만나면 얼음이 녹고 다음날에 대해 판단
+        melting()
+        days += 1
+    print(days)
+
 
 main()
 ```
